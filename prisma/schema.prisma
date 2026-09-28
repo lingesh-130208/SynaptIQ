@@ -1,0 +1,481 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  ADMIN
+  EVENT_MANAGER
+  PROJECT_MANAGER
+  CONTENT_MANAGER
+  MEMBER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  CANCELLED
+}
+
+enum TeamMemberStatus {
+  PENDING
+  ACTIVE
+  LEFT
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum ProjectStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  REJECTED
+}
+
+enum CertificateStatus {
+  ACTIVE
+  REVOKED
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  name               String?
+  email              String   @unique
+  emailVerified      DateTime?
+  image              String?
+  passwordHash       String?
+  role               RoleName @default(MEMBER)
+  isActive           Boolean  @default(true)
+
+  member             Member?
+  accounts           Account[]
+  sessions           Session[]
+  createdEvents      Event[]                 @relation("EventCreator")
+  createdProjects    Project[]               @relation("ProjectCreator")
+  announcements      Announcement[]
+  achievements       Achievement[]
+  galleryImages      GalleryImage[]
+  createdTeams       Team[]                  @relation("TeamCreator")
+  auditLogs          AuditLog[]
+  notifications      Notification[]
+  reviewedApplications MembershipApplication[] @relation("ApplicationReviewer")
+  issuedCertificates Certificate[]            @relation("CertificateIssuer")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Member {
+  id             String @id @default(cuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName       String
+  registerNumber String @unique
+  phone          String?
+  year           String?
+  section        String?
+  department     String?
+  college        String?
+  bio            String?
+  experienceLevel String?
+  interests      String?
+  profilePhoto   String?
+
+  skills              MemberSkill[]
+  eventRegistrations  EventRegistration[]
+  teamMemberships     TeamMember[]
+  sentInvitations     TeamInvitation[] @relation("InvitationSender")
+  receivedInvitations TeamInvitation[] @relation("InvitationReceiver")
+  projectMemberships  ProjectMember[]
+  certificates        Certificate[]
+  createdApplications MembershipApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id      String        @id @default(cuid())
+  name    String        @unique
+  members MemberSkill[]
+}
+
+model MemberSkill {
+  memberId String
+  skillId  String
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  skill  Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, skillId])
+}
+
+model MembershipApplication {
+  id             String @id @default(cuid())
+  memberId       String?
+  fullName       String
+  email          String
+  phone          String?
+  registerNumber String
+  year           String?
+  section        String?
+  department     String?
+  skillsText     String?
+  interests      String?
+  experience     String?
+
+  status       ApplicationStatus @default(PENDING)
+  reviewedById String?
+
+  reviewedBy User? @relation("ApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  createdAt  DateTime  @default(now())
+  reviewedAt DateTime
+}
+
+model Event {
+  id          String @id @default(cuid())
+  title       String
+  slug        String @unique
+  description String
+  bannerUrl   String?
+  date        DateTime
+  startTime   String?
+  endTime     String?
+  venue       String?
+
+  registrationRequired Boolean @default(true)
+  registrationUrl      String?
+  externalUrl          String?
+  maxParticipants      Int?
+
+  status      EventStatus @default(DRAFT)
+  createdById String
+
+  createdBy User @relation("EventCreator", fields: [createdById], references: [id])
+
+  registrations EventRegistration[]
+  teams         Team[]
+  certificates  Certificate[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
+
+model EventRegistration {
+  id         String @id @default(cuid())
+  eventId    String
+  memberId   String
+  status     RegistrationStatus @default(REGISTERED)
+  registeredAt DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, memberId])
+}
+
+model Team {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  eventId     String?
+  createdById String
+  status      String @default("ACTIVE")
+
+  event Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  createdBy User @relation("TeamCreator", fields: [createdById], references: [id])
+
+  members     TeamMember[]
+  invitations TeamInvitation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeamMember {
+  id       String @id @default(cuid())
+  teamId   String
+  memberId String
+  role     String @default("MEMBER")
+  status   TeamMemberStatus @default(ACTIVE)
+  joinedAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, memberId])
+}
+
+model TeamInvitation {
+  id                String @id @default(cuid())
+  teamId            String
+  invitedMemberId   String
+  invitedByMemberId String
+  message           String?
+  status            InvitationStatus @default(PENDING)
+  expiresAt         DateTime?
+  createdAt         DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  invitedMember Member @relation("InvitationReceiver", fields: [invitedMemberId], references: [id], onDelete: Cascade)
+
+  invitedByMember Member @relation("InvitationSender", fields: [invitedByMemberId], references: [id], onDelete: Cascade)
+
+  @@index([invitedMemberId, status])
+}
+
+model Project {
+  id              String @id @default(cuid())
+  title           String
+  slug            String @unique
+  description     String
+  problem         String?
+  solution        String?
+  technologies    String?
+  aiComponents    String?
+  githubUrl       String?
+  demoUrl         String?
+  documentationUrl String?
+  coverImage      String?
+
+  status        ProjectStatus @default(DRAFT)
+  submittedById String
+
+  submittedBy User @relation("ProjectCreator", fields: [submittedById], references: [id])
+
+  members ProjectMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model ProjectMember {
+  id        String @id @default(cuid())
+  projectId String
+  memberId  String
+  role      String?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, memberId])
+}
+
+model Certificate {
+  id                String @id @default(cuid())
+  certificateNumber String @unique
+  memberId          String
+  eventId           String?
+  title             String
+  certificateType   String
+  issueDate         DateTime @default(now())
+  fileUrl           String?
+  verificationToken String @unique
+  status            CertificateStatus @default(ACTIVE)
+  issuedById        String
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  event Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  issuedBy User @relation("CertificateIssuer", fields: [issuedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([memberId])
+}
+
+model Announcement {
+  id        String @id @default(cuid())
+  title     String
+  slug      String @unique
+  content   String
+  imageUrl  String?
+  priority  Int @default(0)
+  published Boolean @default(false)
+  publishedAt DateTime?
+  createdById String
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  category    String
+  date        DateTime?
+  imageUrl    String?
+  externalUrl String?
+  published   Boolean @default(false)
+  createdById String
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model GalleryAlbum {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+  coverImage  String?
+  images      GalleryImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id           String @id @default(cuid())
+  albumId      String
+  imageUrl     String
+  caption      String?
+  uploadedById String
+
+  album GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  link      String?
+  isRead    Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model EmailLog {
+  id        String @id @default(cuid())
+  recipient String
+  subject   String
+  type      String
+  status    String
+  error     String?
+  sentAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id        String @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
+
+model ElixaEdition {
+  id             String @id @default(cuid())
+  title          String
+  edition        String
+  description    String
+  year           Int
+  status         String @default("DRAFT")
+  registrationUrl String?
+  rulesUrl       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id        String @id @default(cuid())
+  key       String @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

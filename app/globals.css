@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #050816;
+  --panel: #0b1022;
+  --panel2: #0f1730;
+  --text: #eef6ff;
+  --muted: #91a3bf;
+  --cyan: #37d7ff;
+  --blue: #4c7dff;
+  --border: rgba(105, 180, 255, .16);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(55,215,255,.10), transparent 30rem),
+    radial-gradient(circle at 10% 20%, rgba(76,125,255,.08), transparent 28rem),
+    var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+a { text-decoration: none; color: inherit; }
+::selection { background: rgba(55,215,255,.28); }
+
+.container { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
+.glass {
+  background: linear-gradient(180deg, rgba(17,27,53,.78), rgba(8,14,30,.78));
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 70px rgba(0,0,0,.24);
+  backdrop-filter: blur(18px);
+}
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(85,150,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85,150,255,.06) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+.glow { text-shadow: 0 0 35px rgba(55,215,255,.25); }
+.gradient-text {
+  background: linear-gradient(90deg, #fff, #76e7ff 45%, #7896ff);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.btn-primary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:12px; padding:12px 18px; font-weight:700;
+  background:linear-gradient(135deg,#37d7ff,#4c7dff); color:#03101b;
+  transition:.2s;
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 35px rgba(55,215,255,.22); }
+.btn-secondary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:12px; padding:12px 18px; font-weight:700;
+  border:1px solid var(--border); background:rgba(255,255,255,.04);
+}
+.btn-secondary:hover { background:rgba(255,255,255,.08); }
+.card { border:1px solid var(--border); background:rgba(12,19,40,.72); border-radius:20px; }
+.section { padding:90px 0; }
+.muted { color:var(--muted); }
