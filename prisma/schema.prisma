@@ -63,55 +63,55 @@ enum CertificateStatus {
 }
 
 model User {
-  id                 String   @id @default(cuid())
-  name               String?
-  email              String   @unique
-  emailVerified      DateTime?
-  image              String?
-  passwordHash       String?
-  role               RoleName @default(MEMBER)
-  isActive           Boolean  @default(true)
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          RoleName  @default(MEMBER)
+  isActive      Boolean   @default(true)
 
-  member             Member?
-  accounts           Account[]
-  sessions           Session[]
-  createdEvents      Event[]                 @relation("EventCreator")
-  createdProjects    Project[]               @relation("ProjectCreator")
-  announcements      Announcement[]
-  achievements       Achievement[]
-  galleryImages      GalleryImage[]
-  createdTeams       Team[]                  @relation("TeamCreator")
-  auditLogs          AuditLog[]
-  notifications      Notification[]
+  member               Member?
+  accounts             Account[]
+  sessions             Session[]
+  createdEvents        Event[]                 @relation("EventCreator")
+  createdProjects      Project[]               @relation("ProjectCreator")
+  announcements        Announcement[]
+  achievements         Achievement[]
+  galleryImages        GalleryImage[]
+  createdTeams         Team[]                  @relation("TeamCreator")
+  auditLogs            AuditLog[]
+  notifications        Notification[]
   reviewedApplications MembershipApplication[] @relation("ApplicationReviewer")
-  issuedCertificates Certificate[]            @relation("CertificateIssuer")
+  issuedCertificates   Certificate[]           @relation("CertificateIssuer")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Member {
-  id             String @id @default(cuid())
-  userId         String @unique
-  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  fullName       String
-  registerNumber String @unique
-  phone          String?
-  year           String?
-  section        String?
-  department     String?
-  college        String?
-  bio            String?
+  fullName        String
+  registerNumber  String  @unique
+  phone           String?
+  year            String?
+  section         String?
+  department      String?
+  college         String?
+  bio             String?
   experienceLevel String?
-  interests      String?
-  profilePhoto   String?
+  interests       String?
+  profilePhoto    String?
 
   skills              MemberSkill[]
   eventRegistrations  EventRegistration[]
   teamMemberships     TeamMember[]
-  sentInvitations     TeamInvitation[] @relation("InvitationSender")
-  receivedInvitations TeamInvitation[] @relation("InvitationReceiver")
+  sentInvitations     TeamInvitation[]        @relation("InvitationSender")
+  receivedInvitations TeamInvitation[]        @relation("InvitationReceiver")
   projectMemberships  ProjectMember[]
   certificates        Certificate[]
   createdApplications MembershipApplication[]
@@ -137,7 +137,7 @@ model MemberSkill {
 }
 
 model MembershipApplication {
-  id             String @id @default(cuid())
+  id             String  @id @default(cuid())
   memberId       String?
   fullName       String
   email          String
@@ -158,13 +158,13 @@ model MembershipApplication {
   member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
 
   createdAt  DateTime  @default(now())
-  reviewedAt DateTime
+  reviewedAt DateTime?
 }
 
 model Event {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   title       String
-  slug        String @unique
+  slug        String   @unique
   description String
   bannerUrl   String?
   date        DateTime
@@ -194,11 +194,11 @@ model Event {
 }
 
 model EventRegistration {
-  id         String @id @default(cuid())
-  eventId    String
-  memberId   String
-  status     RegistrationStatus @default(REGISTERED)
-  registeredAt DateTime @default(now())
+  id           String             @id @default(cuid())
+  eventId      String
+  memberId     String
+  status       RegistrationStatus @default(REGISTERED)
+  registeredAt DateTime           @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -208,12 +208,12 @@ model EventRegistration {
 }
 
 model Team {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
   eventId     String?
   createdById String
-  status      String @default("ACTIVE")
+  status      String  @default("ACTIVE")
 
   event Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
 
@@ -227,12 +227,12 @@ model Team {
 }
 
 model TeamMember {
-  id       String @id @default(cuid())
+  id       String           @id @default(cuid())
   teamId   String
   memberId String
-  role     String @default("MEMBER")
+  role     String           @default("MEMBER")
   status   TeamMemberStatus @default(ACTIVE)
-  joinedAt DateTime @default(now())
+  joinedAt DateTime         @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
@@ -242,14 +242,14 @@ model TeamMember {
 }
 
 model TeamInvitation {
-  id                String @id @default(cuid())
+  id                String           @id @default(cuid())
   teamId            String
   invitedMemberId   String
   invitedByMemberId String
   message           String?
   status            InvitationStatus @default(PENDING)
   expiresAt         DateTime?
-  createdAt         DateTime @default(now())
+  createdAt         DateTime         @default(now())
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
@@ -261,18 +261,18 @@ model TeamInvitation {
 }
 
 model Project {
-  id              String @id @default(cuid())
-  title           String
-  slug            String @unique
-  description     String
-  problem         String?
-  solution        String?
-  technologies    String?
-  aiComponents    String?
-  githubUrl       String?
-  demoUrl         String?
+  id               String  @id @default(cuid())
+  title            String
+  slug             String  @unique
+  description      String
+  problem          String?
+  solution         String?
+  technologies     String?
+  aiComponents     String?
+  githubUrl        String?
+  demoUrl          String?
   documentationUrl String?
-  coverImage      String?
+  coverImage       String?
 
   status        ProjectStatus @default(DRAFT)
   submittedById String
@@ -288,7 +288,7 @@ model Project {
 }
 
 model ProjectMember {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   projectId String
   memberId  String
   role      String?
@@ -301,15 +301,15 @@ model ProjectMember {
 }
 
 model Certificate {
-  id                String @id @default(cuid())
-  certificateNumber String @unique
+  id                String            @id @default(cuid())
+  certificateNumber String            @unique
   memberId          String
   eventId           String?
   title             String
   certificateType   String
-  issueDate         DateTime @default(now())
+  issueDate         DateTime          @default(now())
   fileUrl           String?
-  verificationToken String @unique
+  verificationToken String            @unique
   status            CertificateStatus @default(ACTIVE)
   issuedById        String
 
@@ -325,13 +325,13 @@ model Certificate {
 }
 
 model Announcement {
-  id        String @id @default(cuid())
-  title     String
-  slug      String @unique
-  content   String
-  imageUrl  String?
-  priority  Int @default(0)
-  published Boolean @default(false)
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String
+  imageUrl    String?
+  priority    Int       @default(0)
+  published   Boolean   @default(false)
   publishedAt DateTime?
   createdById String
 
@@ -342,14 +342,14 @@ model Announcement {
 }
 
 model Achievement {
-  id          String @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String
   category    String
   date        DateTime?
   imageUrl    String?
   externalUrl String?
-  published   Boolean @default(false)
+  published   Boolean   @default(false)
   createdById String
 
   createdBy User @relation(fields: [createdById], references: [id])
@@ -358,7 +358,7 @@ model Achievement {
 }
 
 model GalleryAlbum {
-  id          String @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String?
   coverImage  String?
@@ -369,7 +369,7 @@ model GalleryAlbum {
 }
 
 model GalleryImage {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   albumId      String
   imageUrl     String
   caption      String?
@@ -383,13 +383,13 @@ model GalleryImage {
 }
 
 model Notification {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   title     String
   message   String
   type      String
   link      String?
-  isRead    Boolean @default(false)
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -398,7 +398,7 @@ model Notification {
 }
 
 model EmailLog {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   recipient String
   subject   String
   type      String
@@ -408,7 +408,7 @@ model EmailLog {
 }
 
 model AuditLog {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String?
   action    String
   entity    String
@@ -424,22 +424,22 @@ model AuditLog {
 }
 
 model ElixaEdition {
-  id             String @id @default(cuid())
-  title          String
-  edition        String
-  description    String
-  year           Int
-  status         String @default("DRAFT")
+  id              String  @id @default(cuid())
+  title           String
+  edition         String
+  description     String
+  year            Int
+  status          String  @default("DRAFT")
   registrationUrl String?
-  rulesUrl       String?
+  rulesUrl        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Setting {
-  id        String @id @default(cuid())
-  key       String @unique
+  id        String   @id @default(cuid())
+  key       String   @unique
   value     String
   updatedAt DateTime @updatedAt
 }
@@ -463,7 +463,7 @@ model Account {
 }
 
 model Session {
-  sessionToken String @unique
+  sessionToken String   @unique
   userId       String
   expires      DateTime
 
@@ -474,7 +474,7 @@ model Session {
 
 model VerificationToken {
   identifier String
-  token      String @unique
+  token      String   @unique
   expires    DateTime
 
   @@unique([identifier, token])

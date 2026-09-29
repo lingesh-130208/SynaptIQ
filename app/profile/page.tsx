@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
+
 import {
   UserCircle,
   Mail,
@@ -47,6 +49,10 @@ export default async function ProfilePage() {
     },
   });
 
+  /* --------------------------------
+     NO MEMBER PROFILE
+  -------------------------------- */
+
   if (!member) {
     return (
       <section className="section min-h-[75vh]">
@@ -78,15 +84,25 @@ export default async function ProfilePage() {
     );
   }
 
+  /* --------------------------------
+     SKILLS
+  -------------------------------- */
+
   const skills = member.skills.map(
     (memberSkill) => memberSkill.skill.name
   );
+
+  /* --------------------------------
+     PAGE
+  -------------------------------- */
 
   return (
     <section className="section min-h-[75vh]">
       <div className="container">
 
-        {/* HEADER */}
+        {/* --------------------------------
+            HEADER
+        -------------------------------- */}
 
         <div className="flex flex-wrap items-center justify-between gap-4">
 
@@ -117,11 +133,13 @@ export default async function ProfilePage() {
 
         </div>
 
-        {/* PROFILE CARD */}
+        {/* --------------------------------
+            PROFILE INFORMATION
+        -------------------------------- */}
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
 
-          {/* LEFT */}
+          {/* LEFT PROFILE CARD */}
 
           <div className="card p-7 text-center">
 
@@ -148,7 +166,7 @@ export default async function ProfilePage() {
 
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT INFORMATION CARD */}
 
           <div className="card p-7">
 
@@ -161,7 +179,7 @@ export default async function ProfilePage() {
               <InfoItem
                 icon={<Mail size={18} />}
                 label="Email"
-                value={user.email}
+                value={user.email ?? "Not provided"}
               />
 
               <InfoItem
@@ -200,7 +218,9 @@ export default async function ProfilePage() {
 
         </div>
 
-        {/* BIO */}
+        {/* --------------------------------
+            BIO
+        -------------------------------- */}
 
         <div className="mt-6 card p-7">
 
@@ -215,17 +235,21 @@ export default async function ProfilePage() {
 
         </div>
 
-        {/* SKILLS */}
+        {/* --------------------------------
+            SKILLS
+        -------------------------------- */}
 
         <div className="mt-6 card p-7">
 
           <div className="flex items-center gap-3">
+
             <Code2
               size={21}
               className="text-cyan-300"
             />
 
             <div>
+
               <h2 className="font-bold">
                 Technical Skills
               </h2>
@@ -233,16 +257,21 @@ export default async function ProfilePage() {
               <p className="mt-1 text-sm text-slate-500">
                 Skills available for project and team discovery
               </p>
+
             </div>
+
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
 
             {skills.length === 0 ? (
+
               <p className="text-sm text-slate-500">
                 No skills added yet.
               </p>
+
             ) : (
+
               skills.map((skill) => (
                 <span
                   key={skill}
@@ -251,13 +280,16 @@ export default async function ProfilePage() {
                   {skill}
                 </span>
               ))
+
             )}
 
           </div>
 
         </div>
 
-        {/* TEAMS */}
+        {/* --------------------------------
+            TEAMS
+        -------------------------------- */}
 
         <div className="mt-6 card p-7">
 
@@ -271,6 +303,7 @@ export default async function ProfilePage() {
               />
 
               <div>
+
                 <h2 className="font-bold">
                   My Teams
                 </h2>
@@ -278,6 +311,7 @@ export default async function ProfilePage() {
                 <p className="mt-1 text-sm text-slate-500">
                   Teams you are currently part of
                 </p>
+
               </div>
 
             </div>
@@ -294,10 +328,13 @@ export default async function ProfilePage() {
           <div className="mt-6">
 
             {member.teamMemberships.length === 0 ? (
+
               <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-slate-500">
                 You are not part of any team yet.
               </div>
+
             ) : (
+
               <div className="grid gap-3 md:grid-cols-2">
 
                 {member.teamMemberships.map(
@@ -325,13 +362,16 @@ export default async function ProfilePage() {
                 )}
 
               </div>
+
             )}
 
           </div>
 
         </div>
 
-        {/* PROJECTS */}
+        {/* --------------------------------
+            PROJECTS
+        -------------------------------- */}
 
         <div className="mt-6 card p-7">
 
@@ -343,6 +383,7 @@ export default async function ProfilePage() {
             />
 
             <div>
+
               <h2 className="font-bold">
                 My Projects
               </h2>
@@ -350,6 +391,7 @@ export default async function ProfilePage() {
               <p className="mt-1 text-sm text-slate-500">
                 Projects connected to your SynaptIQ profile
               </p>
+
             </div>
 
           </div>
@@ -357,10 +399,13 @@ export default async function ProfilePage() {
           <div className="mt-6">
 
             {member.projectMemberships.length === 0 ? (
+
               <div className="rounded-xl border border-dashed border-white/10 p-5 text-sm text-slate-500">
                 You are not part of any project yet.
               </div>
+
             ) : (
+
               <div className="grid gap-3 md:grid-cols-2">
 
                 {member.projectMemberships.map(
@@ -389,6 +434,7 @@ export default async function ProfilePage() {
                 )}
 
               </div>
+
             )}
 
           </div>
@@ -400,17 +446,16 @@ export default async function ProfilePage() {
   );
 }
 
-
-/* -----------------------------
+/* --------------------------------
    INFORMATION ITEM
------------------------------ */
+-------------------------------- */
 
 function InfoItem({
   icon,
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
 }) {
